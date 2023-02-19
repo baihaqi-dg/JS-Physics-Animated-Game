@@ -133,6 +133,39 @@ window.addEventListener('load',function(){
             }
         }
     }
+
+    class Egg {
+        constructor(game) {
+            this.game = game;
+            this.collisionRadius = 40;
+            this.margin = this.collisionRadius * 2;
+            this.collisionX = this.margin + (Math.random() * (this.game.width-this.margin *2));
+            this.collisionY = this.game.topMargin + (Math.random() * (this.game.height-this.game.topMargin -this.margin));
+            this.collisionRadius = 40;
+            this.image = document.getElementById('egg');
+            this.spriteWidth = 115;
+            this.spriteHeight = 135;
+            this.width = this.spriteWidth;
+            this.height = this.spriteHeight;
+            this.spriteX = this.collisionX - this.width * 0.5;
+            this.spriteY = this.collisionY - this.height * 0.5 - 30;
+        }
+        draw(context){
+            context.drawImage(this.image,this.spriteX,this.spriteY);
+            if (this.game.debug) {
+                context.beginPath();
+                context.arc(this.collisionX,this.collisionY,this.collisionRadius,0,Math.PI * 2);
+                context.save();
+                context.globalAlpha = 0.5;
+                context.fill();
+                context.restore();
+                context.stroke();
+            }
+        }
+        update(){
+            
+        }
+    }
     
     class Game{
         constructor(canvas){
@@ -142,8 +175,15 @@ window.addEventListener('load',function(){
             this.topMargin = 260;
             this.debug = true;
             this.player = new Player(this);
-            this.numberOfObstacles = 4;
+            this.fps = 70;
+            this.timer = 0;
+            this.interval = 1000/this.fps;
+            this.eggTimer = 0;
+            this.eggInterval = 500;
+            this.numberOfObstacles = 10;
+            this.maxEgg = 10;
             this.obstacle = [];
+            this.eggs = [];
             this.mouse = {
                 x:this.width * 0.5,
                 y:this.height * 0.5,
@@ -173,10 +213,24 @@ window.addEventListener('load',function(){
                 }
             });
         }
-        render(context){
-            this.player.draw(context);
-            this.player.update();
-            this.obstacle.forEach(obstacle => obstacle.draw(context));
+        render(context,deltaTime){
+            if (this.timer > this.interval) {
+                context.clearRect(0,0,this.width,this.height);
+                this.obstacle.forEach(obstacle => obstacle.draw(context));
+                this.eggs.forEach(egg => egg.draw(context));
+                this.player.draw(context);
+                this.player.update();
+                this.timer = 0;
+            }
+            this.timer += deltaTime;  
+
+            //add eggs periodically
+            if (this.eggTimer > this.eggInterval && this.eggs.length <this.maxEgg) {
+                this.addEgg();
+                this.eggTimer = 0;
+            }else {
+                this.eggTimer += deltaTime;
+            }
         }
 
         checkCollision(a,b){
@@ -186,6 +240,10 @@ window.addEventListener('load',function(){
             const sumOfRadii = a.collisionRadius + b.collisionRadius;
             // return (distance<sumOfRadii);
             return[(distance<sumOfRadii), distance , sumOfRadii , dx, dy];
+        }
+
+        addEgg(){
+            this.eggs.push(new Egg(this));
         }
 
         init(){
@@ -221,11 +279,15 @@ window.addEventListener('load',function(){
     game.init();
     console.log(game);
 
-    function animate(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        game.render(ctx);
+    let lastTime = 0;
+    function animate(timeStamp){
+        const deltaTime = timeStamp - lastTime;
+        lastTime = timeStamp;
+        // console.log(deltaTime);
+        // ctx.clearRect(0,0,canvas.width,canvas.height);
+        game.render(ctx,deltaTime);
         requestAnimationFrame(animate);
     }
-    animate();
+    animate(0);
 });
 
