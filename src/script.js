@@ -19,7 +19,7 @@ window.addEventListener('load',function(){
             this.speedY = 0;
             this.dx = 0;
             this.dy = 0;
-            this.speedModifier = 50;
+            this.speedModifier = 20;
         }
         draw(context){
             context.beginPath();
@@ -48,10 +48,17 @@ window.addEventListener('load',function(){
             this.collisionX += this.speedX * this.speedModifier;
             this.collisionY += this.speedY * this.speedModifier;
             //check collison
-            this.game.obstacle.forEach(obstacle =>{
-                if(this.game.checkCollision(this,obstacle)){
-                    console.log('collision');
-                };
+            this.game.obstacle.forEach(obstacles =>{
+                // if(this.game.checkCollision(this,obstacles)){
+                //     console.log('collision');
+                // };
+                let [collision, distance , sumOfRadii , dx, dy] = this.game.checkCollision(this,obstacles);
+                if (collision) {
+                    const unit_x = dx/ distance;
+                    const unit_y = dy/distance;
+                    this.collisionX = obstacles.collisionX + (sumOfRadii + 1) *unit_x;
+                    this.collisionY = obstacles.collisionY + (sumOfRadii + 1) *unit_y;
+                }
             })
         }
     }
@@ -127,11 +134,12 @@ window.addEventListener('load',function(){
         }
 
         checkCollision(a,b){
-            const dx = a.collisionX - b.collisionY;
-            const dy = a.collisionY - b.collisionX;
+            const dx = a.collisionX - b.collisionX;
+            const dy = a.collisionY - b.collisionY;
             const distance = Math.hypot(dy,dx);
             const sumOfRadii = a.collisionRadius + b.collisionRadius;
-            return(distance<sumOfRadii);
+            // return (distance<sumOfRadii);
+            return[(distance<sumOfRadii), distance , sumOfRadii , dx, dy];
         }
 
         init(){
