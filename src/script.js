@@ -234,7 +234,7 @@ window.addEventListener('load',function(){
             if(this.collisionY <  this.game.topMargin){
                 this.markedForDeletion = true;
                 this.game.removeGameObjects();
-                this.score++;
+                this.game.score++;
             }
             //handle collision with object
             let collisionObject = [this.game.player, ...this.game.obstacle];
