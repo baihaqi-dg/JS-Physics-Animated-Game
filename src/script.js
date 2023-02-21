@@ -397,7 +397,7 @@ window.addEventListener('load',function(){
             this.particles = [];
             this.score = 0;
             this.lostHatchlings = 0;
-            this.winningScore = 1;
+            this.winningScore = 30;
             this.gameOver = false;
             this.mouse = {
                 x:this.width * 0.5,
